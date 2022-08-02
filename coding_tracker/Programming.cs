@@ -14,11 +14,6 @@ namespace coding_tracker
 
         public int Minutes { get; set; }
 
-        // public Programming(int id, DateTime date, int minutes)
-        // {
-        //     Id = id;
-        //     Date = date;
-        //     Minutes = minutes;
-        // }
+        
     }
 }

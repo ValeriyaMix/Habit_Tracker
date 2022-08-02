@@ -49,10 +49,10 @@ namespace coding_tracker
                         objTracker.Insert(connectionString);
                         break;
                     case "3":
-                        //objTracker.Delete();
+                        objTracker.Delete(connectionString);
                         break;
                     case "4":
-                        //objTracker.Update();
+                        objTracker.Update(connectionString);
                         break;
                     default:
                         Console.WriteLine("\nInvalid Command. Please type a number from 0 to 4.\n");
