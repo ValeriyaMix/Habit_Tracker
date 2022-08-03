@@ -8,18 +8,18 @@ namespace coding_tracker
 {
     internal interface ITrackerFunctionality
     {
-        void GetUserInput();
+        string GetUserInput();
 
-        void Insert();
+        void Insert(string connectionString);
 
         string GetDateInput();
 
         int GetNumberInput();
 
-        void GetAllRecords();
+        void GetAllRecords(string connectionString);
 
-        void Delete();
+        void Delete(string connectionString);
 
-        void Update();
+        void Update(string connectionString);
     }
 }

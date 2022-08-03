@@ -8,7 +8,7 @@ using Microsoft.Data.Sqlite;
 
 namespace coding_tracker
 {
-    public class TrackerFunctionality
+    public class TrackerFunctionality: ITrackerFunctionality
     {
         
         public string GetUserInput()
@@ -82,9 +82,9 @@ namespace coding_tracker
                 connection.Close();
 
                 Console.WriteLine("------------------------------------------\n");
-                foreach (var dw in tableData)
+                foreach (Programming line in tableData)
                 {
-                    Console.WriteLine($"{dw.Id}) on {dw.Date.ToString("dd/MM/yy")} I spent programming {dw.Minutes} minutes");  
+                    Console.WriteLine($"{line.Id}) on {line.Date.ToString("dd/MM/yy")} I spent programming {line.Minutes} minutes");  
                 }
                 Console.WriteLine("------------------------------------------\n");
             }
@@ -95,7 +95,7 @@ namespace coding_tracker
             Console.Clear();
             GetAllRecords(connectionString);
 
-            Console.WriteLine("\n\nPlease type the Id of the record you want to delete or type 0 to go back to Main Menu\n\n");
+            Console.WriteLine("\n\nPlease type the Id of the record you want to delete.\n\n");
             int userIdInput = Convert.ToInt32(Console.ReadLine());
 
             using (var connection = new SqliteConnection(connectionString))
@@ -109,13 +109,25 @@ namespace coding_tracker
 
                 if (rowCount == 0)
                 {
-                    Console.WriteLine($"\n\nRecord with Id {userIdInput} doesn't exist. \n\n");
-                    Delete(connectionString);
+                    Console.WriteLine($"\n\nRecord with Id {userIdInput} doesn't exist. Please press any key to continue" +
+                    " deleting or press 0 exit.\n");
+                    connection.Close();
+                    ConsoleKeyInfo pressedKey = Console.ReadKey();
+                    if(pressedKey.Key == ConsoleKey.NumPad0)
+                    {
+                        Environment.Exit(0);
+                    }
+                    else
+                    {
+                        Delete(connectionString);
+                    }  
+                }
+                else
+                {
+                    Console.WriteLine($"\n\nRecord with Id {userIdInput} was deleted. \n\n");
                 }
 
             }
-
-            Console.WriteLine($"\n\nRecord with Id {userIdInput} was deleted. \n\n");
 
         }
 
@@ -123,7 +135,7 @@ namespace coding_tracker
         {
             GetAllRecords(connectionString);
 
-            Console.WriteLine("\n\nPlease type the Id of the record you want to update or type 0 to go back to Main Menu\n\n");
+            Console.WriteLine("\n\nPlease type the Id of the record you want to update.\n\n");
             int userIdInput = Convert.ToInt32(Console.ReadLine());
 
             using (var connection = new SqliteConnection(connectionString))
@@ -136,21 +148,35 @@ namespace coding_tracker
 
                 if (checkQuery == 0)
                 {
-                    Console.WriteLine($"\n\nRecord with Id {userIdInput} doesn't exist.\n\n");
+                    Console.WriteLine($"\n\nRecord with Id {userIdInput} doesn't exist.\nPlease press any key to continue" + 
+                    " updating or press 0 exit.\n");
                     connection.Close();
-                    Update(connectionString);
+                    ConsoleKeyInfo pressedKey = Console.ReadKey();
+                    if(pressedKey.Key == ConsoleKey.NumPad0)
+                    {
+                        Environment.Exit(0);
+                    }
+                    else
+                    {
+                        Update(connectionString);
+                    }
+                    
+                }
+                else
+                {
+                    string date = GetDateInput();
+
+                    int minutes = GetNumberInput();
+
+                    var tableHabit = connection.CreateCommand();
+                    tableHabit.CommandText = $"UPDATE programming_tracker SET date = '{date}', minutes = {minutes} WHERE Id = {userIdInput}";
+
+                    tableHabit.ExecuteNonQuery();
+
+                    connection.Close();
                 }
 
-                string date = GetDateInput();
-
-                int minutes = GetNumberInput();
-
-                var tableHabit = connection.CreateCommand();
-                tableHabit.CommandText = $"UPDATE programming_tracker SET date = '{date}', minutes = {minutes} WHERE Id = {userIdInput}";
-
-                tableHabit.ExecuteNonQuery();
-
-                connection.Close();
+                
             }
 
 
@@ -164,28 +190,29 @@ namespace coding_tracker
 
             if (dateInput == "0") GetUserInput();
 
-            // while (!DateTime.TryParseExact(dateInput, "dd-MM-yy", new CultureInfo("en-US"), DateTimeStyles.None, out _))
-            // {
-            //     Console.WriteLine("\n\nInvalid date. (Format: dd-mm-yy). Type 0 to return to main manu or try again:\n\n");
-            //     dateInput = Console.ReadLine();
-            // }
+            while (!DateTime.TryParseExact(dateInput, "dd/MM/yy", new CultureInfo("en-US"), DateTimeStyles.None, out _))
+            {
+                Console.WriteLine("\n\nInvalid date. (Format: dd/mm/yy). Please try again\n\n");
+                dateInput = Console.ReadLine();
+            }
 
             return dateInput;
         }
 
         public int GetNumberInput()
         {
+            int number;
             Console.WriteLine("\n\nPlease insert how many minutes you spent programming. Type 0 to return to main manu.\n\n");
 
             string numberInput = Console.ReadLine();
 
             if (numberInput == "0") GetUserInput();
 
-            // while (!Int32.TryParse(numberInput, out _) || Convert.ToInt32(numberInput) < 0)
-            // {
-            //     Console.WriteLine("\n\nInvalid number. Try again.\n\n");
-            //     numberInput = Console.ReadLine();
-            // }
+            while (!int.TryParse(numberInput, out number) || Convert.ToInt32(numberInput) < 0)
+            {
+                Console.WriteLine("\nInvalid number. Try again.\n");
+                numberInput = Console.ReadLine();
+            }
 
             int integerInput = Convert.ToInt32(numberInput);
 
